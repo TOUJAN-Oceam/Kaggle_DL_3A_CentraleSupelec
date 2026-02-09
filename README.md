@@ -52,7 +52,7 @@ The repository includes visual analysis of the training process:
     - Plots: Visualizations of the hyperparameter search space and objective value history are available in the optuna_results/ folder.
     - analysis: `shooting_drill_analyse_optuna_results_to_prevent_overfit.py` script used to analyze (by performing cross-validation with 5 seeds and comparing the results with the Optuna score) whether Optuna showed overfitting.
 
-  * Loss Curves: Training and validation loss evolution to monitor overfitting.
+  * Loss Curves: Training and validation loss evolution to monitor overfitting, you can find them in the kaggle_1 folder.
   
   * Performance: Metric evaluated:
   * The shooting exercise will correspond to the absolute error between your prediction and the actual number of crossbars hit by the player, 41 participants, public score: 1.17240 (top 2 in leaderboard), private score: 1.14519 (top 4 in leaderboard).
@@ -113,7 +113,7 @@ Le référentiel comprend une analyse visuelle du processus d'entraînement :
     - Graphiques : des visualisations de l'espace de recherche des hyperparamètres et de l'historique des valeurs objectives sont disponibles dans le dossier optuna_results/.
     - Analyse : script `shooting_drill_analyse_optuna_results_to_prevent_overfit.py` utilisé pour analyser (en effectuant une validation croisée avec 5 graines et en comparant les résultats avec le score Optuna) si Optuna présentait un overfitting.
 
-  * Courbes de perte : évolution des pertes d'entraînement et de validation pour surveiller le surajustement.
+  * Courbes de perte : évolution des pertes d'entraînement et de validation pour surveiller le surajustement, vous pouvez les trouver dans le dossier kaggle_1.
 
   * Performance : Métrique évaluée :
   * L'exercice de tir correspondra à l'erreur absolue entre votre prédiction et le nombre réel de barres transversales touchées par le joueur, 41 participants, score public : 1,17240 (top 2 du leaderboard), score privé : 1,14519 (top 4 du leaderboard).
