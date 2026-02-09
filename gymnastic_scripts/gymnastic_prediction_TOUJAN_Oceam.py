@@ -10,6 +10,7 @@ import random
 import os
 import copy
 import sys
+import matplotlib.pyplot as plt
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -79,8 +80,8 @@ class NeuralNetwork(nn.Module):
         return x
 
 print("Loading data...")
-df_train = pd.read_csv('train.csv')
-df_test = pd.read_csv('test.csv')
+df_train = pd.read_csv('../gymnastic-exam/train.csv')
+df_test = pd.read_csv('../gymnastic-exam/test.csv')
 
 cols = ['age', 'backflip_quality', 'eyebrow_length', 'teeth_whiteness', 'ear_size', 'frontflip_quality', 'stamina', 'shoulder_width']
 X = df_train[cols].values
@@ -109,16 +110,23 @@ for seed_idx, seed in enumerate(HP['seeds']):
         optimizer = optim.Adam(model.parameters(), lr=HP['learning_rate'], weight_decay=HP['weight_decay'])
         scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=HP['t0_scheduler'], T_mult=2)
         criterion = nn.BCEWithLogitsLoss()
-        
+        train_losses = []
+        val_losses = []
+
         best_loss, best_weights = float('inf'), None
         
         for epoch in range(HP['epochs']):
             model.train()
+            running_train_loss = 0.0
+            
             for x_b, t_b in train_dl:
                 optimizer.zero_grad()
                 loss = criterion(model(x_b.to(DEVICE)), t_b.to(DEVICE))
                 loss.backward()
                 optimizer.step()
+                running_train_loss += loss.item()
+            
+            avg_train_loss = running_train_loss / len(train_dl)
             
             model.eval()
             val_loss = 0
@@ -126,14 +134,33 @@ for seed_idx, seed in enumerate(HP['seeds']):
                 for x_b, t_b in val_dl:
                     val_loss += criterion(model(x_b.to(DEVICE)), t_b.to(DEVICE)).item()
             
-            avg_loss = val_loss / len(val_dl)
+            avg_val_loss = val_loss / len(val_dl)
+            
+            train_losses.append(avg_train_loss)
+            val_losses.append(avg_val_loss)
+
             scheduler.step()
             
-            if avg_loss < best_loss:
-                best_loss = avg_loss
+            if avg_val_loss < best_loss:
+                best_loss = avg_val_loss
                 best_weights = copy.deepcopy(model.state_dict())
         
+        plt.figure(figsize=(10, 5))
+        plt.plot(train_losses, label='Train Loss')
+        plt.plot(val_losses, label='Val Loss')
+        plt.title(f'Loss Convergence - Seed {seed} - Fold {val_idx[0]}') # ID unique
+        plt.xlabel('Epochs')
+        plt.ylabel('BCE Loss')
+        plt.legend()
+        plt.grid(True)
+        
+        # Créer un dossier pour ranger les images si besoin
+        os.makedirs('gymnastic_loss_plots', exist_ok=True)
+        plt.savefig(f'gymnastic_loss_plots/loss_seed{seed}_fold_{val_idx[0]}.png')
+        plt.close() 
+
         model.load_state_dict(best_weights)
+
         
         with torch.no_grad():
             oof_p = []
@@ -143,9 +170,9 @@ for seed_idx, seed in enumerate(HP['seeds']):
             
         X_test_sc = scaler.transform(X_test)
         loaders = [
-            DataLoader(GymDataset(X_test_sc, 0.0), batch_size=HP['batch_size']),
-            DataLoader(GymDataset(X_test_sc, HP['noise_level']), batch_size=HP['batch_size']),
-            DataLoader(GymDataset(X_test_sc, HP['noise_level']*1.5), batch_size=HP['batch_size'])
+            DataLoader(GymDataset(X_test_sc, targets=None, noise_level=0.0), batch_size=HP['batch_size']),
+            DataLoader(GymDataset(X_test_sc, targets=None, noise_level=HP['noise_level']), batch_size=HP['batch_size']),
+            DataLoader(GymDataset(X_test_sc, targets=None, noise_level=HP['noise_level']*1.5), batch_size=HP['batch_size'])
         ]
         
         fold_preds = np.zeros(len(X_test))
@@ -159,6 +186,8 @@ for seed_idx, seed in enumerate(HP['seeds']):
         seed_preds += fold_preds / 3 / HP['n_folds']
 
     final_test_preds += seed_preds / len(HP['seeds'])
+
+
 
 acc = np.mean((final_oof_preds > 0.5) == y)
 print(f"Accuracy: {acc:.4f}")

@@ -48,7 +48,9 @@ then run both scripts :
 ## Results & Analysis : 
 The repository includes visual analysis of the training process:
 
-  * `Optuna` Plots: Visualizations of the hyperparameter search space and objective value history are available in the graphs/ or optuna_results/ folder.
+  * `Optuna` 
+    - Plots: Visualizations of the hyperparameter search space and objective value history are available in the optuna_results/ folder.
+    - analysis: `shooting_drill_analyse_optuna_results_to_prevent_overfit.py` script used to analyze (by performing cross-validation with 5 seeds and comparing the results with the Optuna score) whether Optuna showed overfitting.
 
   * Loss Curves: Training and validation loss evolution to monitor overfitting.
   
@@ -107,7 +109,9 @@ puis exécutez les deux scripts :
 ## Résultats et analyse : 
 Le référentiel comprend une analyse visuelle du processus d'entraînement :
 
-  * Graphiques `Optuna` : des visualisations de l'espace de recherche des hyperparamètres et de l'historique des valeurs objectives sont disponibles dans le dossier graphs/ ou optuna_results/.
+  * `Optuna`
+    - Graphiques : des visualisations de l'espace de recherche des hyperparamètres et de l'historique des valeurs objectives sont disponibles dans le dossier optuna_results/.
+    - Analyse : script `shooting_drill_analyse_optuna_results_to_prevent_overfit.py` utilisé pour analyser (en effectuant une validation croisée avec 5 graines et en comparant les résultats avec le score Optuna) si Optuna présentait un overfitting.
 
   * Courbes de perte : évolution des pertes d'entraînement et de validation pour surveiller le surajustement.
 
