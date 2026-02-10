@@ -9,8 +9,8 @@ The repository is divided into two main parts, corresponding to the two distinct
 ### Project 1: [Gymnastic exam pass/fail prediction]
 * Objective: [Predict the binary result of a gymnastic entrance exam] (https://www.kaggle.com/competitions/gymnastic-exam/overview)
 
-### Project 2: [20-minute shooting drill] (https://www.kaggle.com/competitions/10-minute-shooting-drill) 
-* Objective: [Predict number of crossbars hit by the player during a 20-minute shooting drill]
+### Project 2: [20-minute shooting drill]
+* Objective: [Predict number of crossbars hit by the player during a 20-minute shooting drill]  (https://www.kaggle.com/competitions/10-minute-shooting-drill) 
 
 
 ## Key Features & Methodology
