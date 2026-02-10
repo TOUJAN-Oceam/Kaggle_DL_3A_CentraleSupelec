@@ -26,15 +26,12 @@ device = get_device()
 
 
 HP = {
-    # On remet les graines exactes du script Simplicity pour reproduire le 1.1768
     "seeds": [42, 2024, 777, 99, 123], 
     "n_folds": 5,
     
-    # Architecture
     "input_dim": 10,
     "hidden_dim": 416,
     
-    # Hyperparameters
     "batch_size": 16,
     "epochs": 60,
     "learning_rate": 0.00028,
@@ -42,7 +39,6 @@ HP = {
     "noise_level": 0.0153,
     "dropout_rate": 0.296,
     
-    # Scheduler Params
     "sched_factor": 0.88,
     "sched_patience": 3,
     "sched_threshold": 0.00076
@@ -73,7 +69,6 @@ class NeuralNetwork(nn.Module):
     def __init__(self, config):
         super(NeuralNetwork, self).__init__()
         
-        # Architecture defined by config (Trial 36: 10 -> 416 -> 1)
         self.layer1 = nn.Linear(config['input_dim'], config['hidden_dim'])
         self.activation = nn.SiLU()
         self.dropout = nn.Dropout(config['dropout_rate'])
@@ -91,11 +86,11 @@ class NeuralNetwork(nn.Module):
 # --- 3. DATA LOADING ---
 
 print("Loading data...")
-train_path = r'MonChemin\10-minute-shooting-drill\train.csv'
-test_path = r'MonChemin\10-minute-shooting-drill\test.csv'
+train_path = '../10-minute-shooting-drill/train.csv'
+test_path = '../10-minute-shooting-drill/test.csv'
 
-# Chemin vers les prédictions de ton Classifieur Binaire
-binary_pred_path = r'stacking/pred_binary_classifier.csv'
+# Classifier
+binary_pred_path = 'stacking/pred_binary_classifier.csv'
 
 df_train_full = pd.read_csv(train_path)
 df_test = pd.read_csv(test_path)
@@ -194,6 +189,20 @@ for seed_idx, seed in enumerate(HP['seeds']):
                 best_val_mae = val_mae
                 best_model_state = copy.deepcopy(model.state_dict())
         
+        plt.figure(figsize=(10, 5))
+        plt.plot(fold_losses, label='Validation MAE', color='orange')
+        plt.title(f'Convergence Validation - Seed {seed} - Fold {fold+1}')
+        plt.xlabel('Epochs')
+        plt.ylabel('MAE')
+        plt.legend()
+        plt.grid(True)
+        
+        os.makedirs('shooting_drill_training_plots', exist_ok=True)
+        
+        # Sauvegarder l'image
+        plt.savefig(f'shooting_drill_training_plots/val_mae_seed{seed}_fold{fold+1}.png')
+        plt.close()
+
         print(f"   Fold {fold+1}: Best MAE = {best_val_mae:.4f}")
         global_cv_scores.append(best_val_mae)
         all_history_losses.append(fold_losses)
@@ -207,8 +216,7 @@ for seed_idx, seed in enumerate(HP['seeds']):
                 all_true_values.extend(targets.cpu().numpy().flatten())
                 all_pred_values.extend(real_preds.cpu().numpy().flatten())
         
-        # --- TEST TIME AUGMENTATION (TTA) ---
-        # This is the magic part missing in your previous script!
+        # TEST TIME AUGMENTATION (TTA) 
         X_test_scaled = scaler.transform(X_kaggle_test)
         
         loader_clean = DataLoader(ShootingDataset(X_test_scaled, noise_level=0.0), batch_size=HP['batch_size'])
@@ -274,6 +282,6 @@ sub_orig.to_csv(f"submission_Simplicity_TTA_{mean_score:.4f}.csv", index=False)
 
 # Save Processed
 sub_proc = pd.DataFrame({'id': df_test['id'], 'Number Of Crossbars': final_preds_processed})
-filename_proc = f"submission_Simplicity_TTA_{mean_score:.4f}_BINARY_FILTERED.csv"
+filename_proc = f"submission_{mean_score:.4f}.csv"
 sub_proc.to_csv(filename_proc, index=False)
 print(f"📝 Fichier filtré '{filename_proc}' prêt.")
